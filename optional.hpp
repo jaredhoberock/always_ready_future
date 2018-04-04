@@ -118,21 +118,21 @@ class optional : public detail::optional_base<T>
 {
   public:
     __host__ __device__
-    optional(nullopt_t) : contains_value_{false} {}
+    optional(nullopt_t) : has_value_{false} {}
 
     __host__ __device__
     optional() : optional(nullopt) {}
 
     __host__ __device__
     optional(const optional& other)
-      : contains_value_(other.contains_value_)
+      : has_value_(other.has_value_)
     {
       emplace(*other);
     }
 
     __host__ __device__
     optional(optional&& other)
-      : contains_value_(false)
+      : has_value_(false)
     {
       if(other)
       {
@@ -142,7 +142,7 @@ class optional : public detail::optional_base<T>
 
     __host__ __device__
     optional(const T& value)
-      : contains_value_(false)
+      : has_value_(false)
     {
       emplace(value);
     }
@@ -156,7 +156,7 @@ class optional : public detail::optional_base<T>
     template<class... Args>
     __host__ __device__
     optional(in_place_t, Args&&... args)
-      : contains_value_(false)
+      : has_value_(false)
     {
       emplace(std::forward<Args>(args)...);
     }
@@ -167,7 +167,7 @@ class optional : public detail::optional_base<T>
              >::type>
     __host__ __device__
     optional(in_place_t, std::initializer_list<U> ilist, Args&&... args)
-      : contains_value_(false)
+      : has_value_(false)
     {
       emplace(ilist, std::forward<Args>(args)...);
     }
@@ -175,13 +175,13 @@ class optional : public detail::optional_base<T>
     __host__ __device__
     ~optional()
     {
-      clear();
+      reset();
     }
 
     __host__ __device__
     optional& operator=(nullopt_t)
     {
-      clear();
+      reset();
       return *this;
     }
 
@@ -238,10 +238,10 @@ class optional : public detail::optional_base<T>
     __host__ __device__
     void emplace(Args&&... args)
     {
-      clear();
+      reset();
 
       new (operator->()) T(std::forward<Args>(args)...);
-      contains_value_ = true;
+      has_value_ = true;
     }
 
     template<class U, class... Args,
@@ -251,16 +251,16 @@ class optional : public detail::optional_base<T>
     __host__ __device__
     void emplace(std::initializer_list<U> ilist, Args&&... args)
     {
-      clear();
+      reset();
 
       new (operator->()) T(ilist, std::forward<Args>(args)...);
-      contains_value_ = true;
+      has_value_ = true;
     }
 
     __host__ __device__
     explicit operator bool() const
     {
-      return contains_value_;
+      return has_value_;
     }
 
     __host__ __device__
@@ -324,7 +324,7 @@ class optional : public detail::optional_base<T>
     __host__ __device__
     void swap(optional& other)
     {
-      if(*other)
+      if(other)
       {
         if(*this)
         {
@@ -386,18 +386,18 @@ class optional : public detail::optional_base<T>
       return *operator->();
     }
 
-  private:
     __host__ __device__
-    void clear()
+    void reset()
     {
       if(*this)
       {
         (**this).~T();
-        contains_value_ = false;
+        has_value_ = false;
       }
     }
 
-    bool contains_value_;
+  private:
+    bool has_value_;
 };
 
 
