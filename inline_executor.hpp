@@ -24,7 +24,7 @@ class inline_executor
 
     template<class Function>
     future<std::result_of_t<std::decay_t<Function>()>>
-    async_execute(Function&& f) const
+    twoway_execute(Function&& f) const
     {
       using result_type = std::result_of_t<std::decay_t<Function>()>;
 
@@ -57,7 +57,7 @@ class inline_executor
 
     template<class Function, class Factory1, class Factory2>
     future<std::result_of_t<Factory1()>>
-    bulk_async_execute(Function f, size_t n, Factory1 result_factory, Factory2 shared_factory) const
+    bulk_twoway_execute(Function f, size_t n, Factory1 result_factory, Factory2 shared_factory) const
     {
       using result_type = std::result_of_t<Factory1()>;
 
